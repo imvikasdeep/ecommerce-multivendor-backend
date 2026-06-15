@@ -1,3 +1,4 @@
+import User from "../models/user.model.js";
 import Vendor from "../models/vendor.model.js";
 
 export const applyVendor = async (req, res) => {
@@ -30,7 +31,7 @@ export const applyVendor = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.message
+            message: error.message
         })
     }
 
@@ -39,7 +40,7 @@ export const applyVendor = async (req, res) => {
 export const getVendors = async (req, res) => {
     try {
 
-        const vendors = await Vendor.find().populate('user', 'email role');
+        const vendors = await Vendor.find().populate('user', 'name email role');
 
         res.status(200).json({
             success: true,
@@ -51,6 +52,36 @@ export const getVendors = async (req, res) => {
         res.status(500).json({
             success: false,
             data: error.message
+        })
+    }
+}
+
+export const approveVendor = async (req, res) => {
+    try {
+
+        const vendor = await Vendor.findById(req.params.id);
+
+        if (!vendor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Vendor not found'
+            })
+        }
+
+        vendor.status = "approved";
+        await vendor.save();
+
+        await User.findByIdAndUpdate(vendor.user, { role: 'vendor' });
+
+        res.status(200).json({
+            status: false,
+            message: 'Vendor approved successfully'
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
         })
     }
 }
