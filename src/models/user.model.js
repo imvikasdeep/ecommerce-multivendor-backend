@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
-            trim: true
+            trim: true,
+            unique: true // 1 user shuld have 1 card document
         },
 
         email: {
