@@ -20,7 +20,7 @@ const cartSchema = mongoose.Schema(
                     min: 1
                 }
             }
-        ]
+        ] 
     },
     {
         timestamp: true
