@@ -12,8 +12,7 @@ export const applyVendor = async (req, res) => {
         if (existingVendor) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "Vendor profile already exists",
+                message: "Vendor profile already exists",
             });
         }
 
