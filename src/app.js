@@ -6,6 +6,7 @@ import vendorRouter from "./routes/vendor.route.js"
 import productRouter from "./routes/product.route.js"
 import { protect } from "./middleware/auth.middleware.js";
 import cartRouter from "./routes/cart.route.js";
+import orderRouter from "./routes/order.route.js";
 
 const app = express();
 const router = express.Router();
@@ -26,5 +27,6 @@ app.use("/api/users", protect, userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/vendors", protect, vendorRouter);
 app.use("/api/cart", protect, cartRouter);
+app.use("/api/order", protect, orderRouter);
 
 export default app;

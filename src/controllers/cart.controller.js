@@ -29,7 +29,7 @@ export const addToCart = async (req, res) => {
             const exisitingItem = cart.items.find(item => item.product.toString() === productId);
 
             if (!exisitingItem) {
-                cart.item.push({
+                cart.items.push({
                     product: productId,
                     quantity
                 })
