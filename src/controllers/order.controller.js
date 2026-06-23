@@ -54,3 +54,133 @@ export const placeOrder = async (req, res) => {
         })
     }
 }
+
+export const getMyOrders = async (req, res) => {
+    try {
+
+        const orders = await Order.findOne({ user: req.user.id });
+
+        if (!orders) {
+            res.status(404).json({
+                success: false,
+                message: "No orders yet"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            data: orders
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const getOrderById = async (req, res) => {
+    try {
+
+        const order = await Order.findById(req.params.id).populate("user", "name email");
+
+        if (!order) {
+            res.status(404).json({
+                success: false,
+                message: "Order not found"
+            })
+        }
+
+        if (
+            req.user.role !== "admin" &&
+            order.user._id.toString()
+            !== req.user._id.toString()
+        ) {
+
+            return res.status(403).json({
+                success: false,
+                message: "Not authorized"
+            });
+
+        }
+
+        res.status(200).json({
+            success: true,
+            data: order
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export const getAllOrders = async (req, res) => {
+
+    try {
+
+        const orders =
+            await Order.find()
+                .populate(
+                    "user",
+                    "name email"
+                )
+                .sort({
+                    createdAt: -1
+                });
+
+        res.status(200).json({
+            success: true,
+            count: orders.length,
+            data: orders
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
+
+export const updateOrderStatus = async (req, res) => {
+
+        try {
+
+            const order =
+                await Order.findById(
+                    req.params.id
+                );
+
+            if (!order) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Order not found"
+                });
+            }
+
+            order.status =
+                req.body.status;
+
+            await order.save();
+
+            res.status(200).json({
+                success: true,
+                data: order
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+
+        }
+    };
