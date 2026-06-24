@@ -6,8 +6,8 @@ const orderRouter = express.Router();
 
 orderRouter.post("/", placeOrder);
 orderRouter.get("/", getMyOrders);
-orderRouter.get("/:id", getOrderById);
 orderRouter.get("/admin/all", authorize("admin"), getAllOrders);
+orderRouter.get("/:id", getOrderById);
 orderRouter.patch("/:id/status", authorize("admin"), updateOrderStatus);
 
 export default orderRouter;

@@ -4,7 +4,12 @@ import { Order } from "../models/order,model.js";
 export const placeOrder = async (req, res) => {
     try {
 
-        const cart = await Cart.findOne({ user: req.user.id }).populate("items.product");
+        const cart = await Cart.findOne({ user: req.user.id }).populate({
+            path: "items.product",
+            populate: {
+                path: "vendor"
+            }
+        });
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({
@@ -13,22 +18,25 @@ export const placeOrder = async (req, res) => {
             });
         }
 
+        for (const item of cart.items) {
+            if (item.quantity >= item.product.stock) {
+                return res.status(400).json({
+                    success: false,
+                    message: `${item.product.name} has insufficient stock`
+                });
+            }
+        }
+
         let totalAmount = 0;
 
         const orderItems = cart.items.map(item => {
             totalAmount += item.product.price * item.quantity;
             return {
-                product:
-                    item.product._id,
-
-                name:
-                    item.product.name,
-
-                price:
-                    item.product.price,
-
-                quantity:
-                    item.quantity
+                product: item.product._id,
+                vendor: item.product.vendor._id,
+                name: item.product.name,
+                price: item.product.price,
+                quantity: item.quantity
             };
         })
 
@@ -37,6 +45,11 @@ export const placeOrder = async (req, res) => {
             items: orderItems,
             totalAmount
         });
+
+        for (const item of cart.items) {
+            item.product.stock -= item.quantity;
+            await item.product.save();
+        }
 
         cart.items = [];
 
@@ -150,37 +163,37 @@ export const getAllOrders = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
 
-        try {
+    try {
 
-            const order =
-                await Order.findById(
-                    req.params.id
-                );
+        const order =
+            await Order.findById(
+                req.params.id
+            );
 
-            if (!order) {
-                return res.status(404).json({
-                    success: false,
-                    message:
-                        "Order not found"
-                });
-            }
-
-            order.status =
-                req.body.status;
-
-            await order.save();
-
-            res.status(200).json({
-                success: true,
-                data: order
-            });
-
-        } catch (error) {
-
-            res.status(500).json({
+        if (!order) {
+            return res.status(404).json({
                 success: false,
-                message: error.message
+                message:
+                    "Order not found"
             });
-
         }
-    };
+
+        order.status =
+            req.body.status;
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            data: order
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
