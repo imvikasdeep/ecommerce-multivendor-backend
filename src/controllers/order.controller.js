@@ -1,5 +1,5 @@
 import Cart from "../models/cart.model.js"
-import { Order } from "../models/order,model.js";
+import { Order } from "../models/order.model.js";
 
 export const placeOrder = async (req, res) => {
     try {
